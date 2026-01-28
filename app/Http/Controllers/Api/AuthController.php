@@ -23,23 +23,10 @@ class AuthController extends Controller
         'name' => $request->name,
         'email' => $request->email,
         'password' => bcrypt($request->password),
-        'balance' => 1000, // initial USD balance for testing/demo
+        'balance' => 0, // initial USD balance for testing/demo
     ]);
 
-    // Create initial assets for testing/demo
-    \App\Models\Asset::create([
-        'user_id' => $user->id,
-        'symbol' => 'BTC',
-        'amount' => 1,          // 1 BTC
-        'locked_amount' => 0,
-    ]);
-
-    \App\Models\Asset::create([
-        'user_id' => $user->id,
-        'symbol' => 'ETH',
-        'amount' => 5,          // 5 ETH
-        'locked_amount' => 0,
-    ]);
+  
 
     // Generate API token
     $token = $user->createToken('api-token')->plainTextToken;
