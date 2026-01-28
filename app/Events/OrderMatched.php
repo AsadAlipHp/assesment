@@ -4,6 +4,7 @@ namespace App\Events;
 
 use App\Models\Order;
 use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -11,15 +12,18 @@ use Illuminate\Queue\SerializesModels;
 
 class OrderMatched implements ShouldBroadcast
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $buyOrder;
-    public $sellOrder;
-    public $amount;
-    public $price;
-    public $fee;
+    public Order $buyOrder;
+    public Order $sellOrder;
+    public float $amount;
+    public float $price;
+    public float $fee;
 
-    public function __construct(Order $buyOrder, Order $sellOrder, $amount, $price, $fee)
+    /**
+     * Create a new event instance.
+     */
+    public function __construct(Order $buyOrder, Order $sellOrder, float $amount, float $price, float $fee)
     {
         $this->buyOrder = $buyOrder;
         $this->sellOrder = $sellOrder;
@@ -29,13 +33,11 @@ class OrderMatched implements ShouldBroadcast
     }
 
     /**
-     * Which channel should this event broadcast on?
+     * The channels the event should broadcast on.
      */
     public function broadcastOn()
     {
-            return new \Illuminate\Broadcasting\Channel('test-channel');
-
-        // broadcast to both users: buyer and seller
+        // Private channels for buyer and seller
         return [
             new PrivateChannel('user.' . $this->buyOrder->user_id),
             new PrivateChannel('user.' . $this->sellOrder->user_id),
@@ -43,7 +45,7 @@ class OrderMatched implements ShouldBroadcast
     }
 
     /**
-     * What data should be sent to the channel
+     * The data to broadcast.
      */
     public function broadcastWith()
     {

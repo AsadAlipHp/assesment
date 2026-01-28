@@ -9,23 +9,42 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+      public function register(Request $request)
 {
+    // Validate input
     $request->validate([
         'name' => 'required|string|max:255',
         'email' => 'required|string|email|max:255|unique:users',
         'password' => 'required|string|min:6',
     ]);
 
+    // Create user with initial balance
     $user = \App\Models\User::create([
         'name' => $request->name,
         'email' => $request->email,
         'password' => bcrypt($request->password),
-        'balance' => 0,
+        'balance' => 1000, // initial USD balance for testing/demo
     ]);
 
+    // Create initial assets for testing/demo
+    \App\Models\Asset::create([
+        'user_id' => $user->id,
+        'symbol' => 'BTC',
+        'amount' => 1,          // 1 BTC
+        'locked_amount' => 0,
+    ]);
+
+    \App\Models\Asset::create([
+        'user_id' => $user->id,
+        'symbol' => 'ETH',
+        'amount' => 5,          // 5 ETH
+        'locked_amount' => 0,
+    ]);
+
+    // Generate API token
     $token = $user->createToken('api-token')->plainTextToken;
 
+    // Return response
     return response()->json([
         'success' => true,
         'message' => 'User registered successfully',
